@@ -23,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install msgpack
-        run: python3 -m pip install --quiet msgpack
+        run: |
+          python3 -m venv "$HOME/.factory-venv"
+          "$HOME/.factory-venv/bin/pip" install --quiet msgpack
       - name: Fetch blocks and publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
@@ -40,6 +42,6 @@ jobs:
             gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
               --title "Algorand blocks ${f}-${l}" \
               --notes "algorand raw block data. JSON gz + manifest (first/last/block_count/tx_count/bytes/sha256). No private keys."
-          python3 scripts/fetch_chunk.py --first "$f" --count "$c" --out "algorand_${f}_${l}.json"
+          "$HOME/.factory-venv/bin/python" scripts/fetch_chunk.py --first "$f" --count "$c" --out "algorand_${f}_${l}.json"
           gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
-            "algorand_${f}_${l}.json.gz" "algorand_${f}_${l}.manifest.json"
+            "algorand_${f}_${l}.json.gz" "algorand_${f}_${l}.json.manifest.json"
